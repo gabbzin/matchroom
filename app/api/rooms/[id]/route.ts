@@ -1,26 +1,26 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { GetRoomResponse, UpdateRoomRequest, UpdateRoomResponse } from '@/types/api';
-import { GameState, Player, Match } from '@/types';
-import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import {
+  GetRoomResponse,
+  UpdateRoomRequest,
+  UpdateRoomResponse,
+} from "@/types/api";
+import { GameState, Player, Match } from "@/types";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
-    const ownerToken = request.headers.get('x-owner-token');
+    const ownerToken = request.headers.get("x-owner-token");
 
     const room = await prisma.room.findUnique({
       where: { id },
     });
 
     if (!room) {
-      return NextResponse.json(
-        { error: 'Room not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
     const isOwner = ownerToken === room.ownerId;
@@ -48,17 +48,17 @@ export async function GET(
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Error fetching room:', error);
+    console.error("Error fetching room:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch room' },
-      { status: 500 }
+      { error: "Failed to fetch room" },
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -67,8 +67,8 @@ export async function PUT(
 
     if (!ownerToken) {
       return NextResponse.json(
-        { error: 'Owner token is required' },
-        { status: 401 }
+        { error: "Owner token is required" },
+        { status: 401 },
       );
     }
 
@@ -78,16 +78,13 @@ export async function PUT(
     });
 
     if (!room) {
-      return NextResponse.json(
-        { error: 'Room not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
     if (room.ownerId !== ownerToken) {
       return NextResponse.json(
-        { error: 'Unauthorized: Only the room owner can edit' },
-        { status: 403 }
+        { error: "Unauthorized: Only the room owner can edit" },
+        { status: 403 },
       );
     }
 
@@ -95,12 +92,12 @@ export async function PUT(
     await prisma.room.update({
       where: { id },
       data: {
-        players: gameState.players as unknown as Prisma.JsonArray,
-        teamA: gameState.teamA as unknown as Prisma.JsonArray,
-        teamB: gameState.teamB as unknown as Prisma.JsonArray,
-        bench: gameState.bench as unknown as Prisma.JsonArray,
-        currentMatch: (gameState.currentMatch === null ? Prisma.JsonNull : gameState.currentMatch) as unknown as Prisma.InputJsonValue,
-        matchHistory: gameState.matchHistory as unknown as Prisma.JsonArray,
+        players: gameState.players as any,
+        teamA: gameState.teamA as any,
+        teamB: gameState.teamB as any,
+        bench: gameState.bench as any,
+        currentMatch: gameState.currentMatch as any,
+        matchHistory: gameState.matchHistory as any,
       },
     });
 
@@ -110,10 +107,10 @@ export async function PUT(
 
     return NextResponse.json(response);
   } catch (error) {
-    console.error('Error updating room:', error);
+    console.error("Error updating room:", error);
     return NextResponse.json(
-      { error: 'Failed to update room' },
-      { status: 500 }
+      { error: "Failed to update room" },
+      { status: 500 },
     );
   }
 }

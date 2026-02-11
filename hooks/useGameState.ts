@@ -63,24 +63,106 @@ export const useGameState = () => {
       const updatePlayerName = (p: Player) =>
         p.id === id ? { ...p, name: updatedName } : p;
 
+      // Also update currentMatch if it exists
+      let updatedCurrentMatch = prev.currentMatch;
+      if (updatedCurrentMatch) {
+        updatedCurrentMatch = {
+          ...updatedCurrentMatch,
+          teamA: {
+            ...updatedCurrentMatch.teamA,
+            players: updatedCurrentMatch.teamA.players.map(updatePlayerName),
+          },
+          teamB: {
+            ...updatedCurrentMatch.teamB,
+            players: updatedCurrentMatch.teamB.players.map(updatePlayerName),
+          },
+        };
+      }
+
       return {
         ...prev,
         players: prev.players.map(updatePlayerName),
         teamA: prev.teamA.map(updatePlayerName),
         teamB: prev.teamB.map(updatePlayerName),
         bench: prev.bench.map(updatePlayerName),
+        currentMatch: updatedCurrentMatch,
       };
     });
   }, []);
 
   const removePlayer = useCallback((id: string) => {
-    setState((prev) => ({
-      ...prev,
-      players: prev.players.filter((p) => p.id !== id),
-      teamA: prev.teamA.filter((p) => p.id !== id),
-      teamB: prev.teamB.filter((p) => p.id !== id),
-      bench: prev.bench.filter((p) => p.id !== id),
-    }));
+    setState((prev) => {
+      const newPlayers = prev.players.filter((p) => p.id !== id);
+      let newTeamA = prev.teamA.filter((p) => p.id !== id);
+      let newTeamB = prev.teamB.filter((p) => p.id !== id);
+      let newBench = prev.bench.filter((p) => p.id !== id);
+      let updatedCurrentMatch = prev.currentMatch;
+
+      // Check if we removed a player from an active team
+      const removedFromTeamA = prev.teamA.length !== newTeamA.length;
+      const removedFromTeamB = prev.teamB.length !== newTeamB.length;
+      const hasActiveMatch = prev.currentMatch !== null;
+
+      // If removed from active team during a match, rebalance teams
+      if (hasActiveMatch && (removedFromTeamA || removedFromTeamB)) {
+        const targetSize = Math.min(newTeamA.length, newTeamB.length);
+
+        // If teams are now unbalanced, try to rebalance
+        if (newTeamA.length !== newTeamB.length) {
+          // Try to balance by moving players from larger team to bench
+          if (newTeamA.length > newTeamB.length) {
+            const excess = newTeamA.slice(targetSize);
+            newTeamA = newTeamA.slice(0, targetSize);
+            newBench = [...newBench, ...excess];
+          } else if (newTeamB.length > newTeamA.length) {
+            const excess = newTeamB.slice(targetSize);
+            newTeamB = newTeamB.slice(0, targetSize);
+            newBench = [...newBench, ...excess];
+          }
+        }
+
+        // Update currentMatch with new player lists
+        if (updatedCurrentMatch) {
+          updatedCurrentMatch = {
+            ...updatedCurrentMatch,
+            teamA: {
+              ...updatedCurrentMatch.teamA,
+              players: newTeamA,
+            },
+            teamB: {
+              ...updatedCurrentMatch.teamB,
+              players: newTeamB,
+            },
+          };
+        }
+      } else if (updatedCurrentMatch) {
+        // Just update currentMatch if removed from bench
+        updatedCurrentMatch = {
+          ...updatedCurrentMatch,
+          teamA: {
+            ...updatedCurrentMatch.teamA,
+            players: updatedCurrentMatch.teamA.players.filter(
+              (p) => p.id !== id,
+            ),
+          },
+          teamB: {
+            ...updatedCurrentMatch.teamB,
+            players: updatedCurrentMatch.teamB.players.filter(
+              (p) => p.id !== id,
+            ),
+          },
+        };
+      }
+
+      return {
+        ...prev,
+        players: newPlayers,
+        teamA: newTeamA,
+        teamB: newTeamB,
+        bench: newBench,
+        currentMatch: updatedCurrentMatch,
+      };
+    });
   }, []);
 
   const shuffleAndSplit = useCallback(
@@ -143,9 +225,12 @@ export const useGameState = () => {
     // Validate we have enough players to continue
     const totalPlayers =
       state.teamA.length + state.teamB.length + state.bench.length;
-    const playersPerTeam = state.teamA.length;
 
-    if (totalPlayers < playersPerTeam * 2) {
+    // Use the minimum team size as reference (in case they are unbalanced)
+    const playersPerTeam = Math.min(state.teamA.length, state.teamB.length);
+
+    // Need at least enough players for 2 complete teams
+    if (totalPlayers < playersPerTeam * 2 || playersPerTeam === 0) {
       console.error("Not enough players to continue matches");
       return;
     }

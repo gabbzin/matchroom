@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { nanoid } from 'nanoid';
-import { CreateRoomRequest, CreateRoomResponse } from '@/types/api';
-import { Prisma } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { nanoid } from "nanoid";
+import { CreateRoomRequest, CreateRoomResponse } from "@/types/api";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,8 +10,8 @@ export async function POST(request: NextRequest) {
 
     if (!name || name.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Room name is required' },
-        { status: 400 }
+        { error: "Room name is required" },
+        { status: 400 },
       );
     }
 
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest) {
         teamA: [],
         teamB: [],
         bench: [],
-        currentMatch: Prisma.JsonNull,
+        currentMatch: null,
         matchHistory: [],
       },
     });
@@ -40,10 +39,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    console.error('Error creating room:', error);
+    console.error("Error creating room:", error);
     return NextResponse.json(
-      { error: 'Failed to create room' },
-      { status: 500 }
+      { error: "Failed to create room" },
+      { status: 500 },
     );
   }
 }
