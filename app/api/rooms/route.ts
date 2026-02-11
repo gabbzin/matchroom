@@ -23,11 +23,17 @@ export async function POST(request: NextRequest) {
       data: {
         name: name.trim(),
         ownerId: ownerToken,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         players: [] as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         teamA: [] as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         teamB: [] as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         bench: [] as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         currentMatch: null as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         matchHistory: [] as any,
       },
     });

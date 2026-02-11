@@ -25,11 +25,17 @@ export async function GET(
     const isOwner = ownerToken === room.ownerId;
 
     const gameState: GameState = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       players: room.players as any[],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       teamA: room.teamA as any[],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       teamB: room.teamB as any[],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       bench: room.bench as any[],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       currentMatch: room.currentMatch as any,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       matchHistory: room.matchHistory as any[],
     };
 
@@ -94,11 +100,17 @@ export async function PUT(
     await prisma.room.update({
       where: { id },
       data: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         players: gameState.players as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         teamA: gameState.teamA as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         teamB: gameState.teamB as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         bench: gameState.bench as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         currentMatch: gameState.currentMatch as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         matchHistory: gameState.matchHistory as any,
       },
     });
