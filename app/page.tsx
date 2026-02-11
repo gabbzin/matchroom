@@ -1,185 +1,151 @@
 "use client";
 
 import { useState } from "react";
-import { useGameState } from "@/hooks/useGameState";
-import AddPlayerForm from "@/components/AddPlayerForm";
-import PlayerList from "@/components/PlayerList";
-import TeamDisplay from "@/components/TeamDisplay";
-import CurrentMatch from "@/components/CurrentMatch";
-import MatchHistory from "@/components/MatchHistory";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const {
-    state,
-    isLoaded,
-    addPlayer,
-    editPlayer,
-    removePlayer,
-    shuffleAndSplit,
-    pickWinner,
-    startNextMatch,
-    resetGame,
-    clearAllData,
-  } = useGameState();
+  const router = useRouter();
+  const [roomName, setRoomName] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState("");
 
-  const [playersPerTeam, setPlayersPerTeam] = useState(5);
-  const [activeTab, setActiveTab] = useState<"setup" | "match" | "history">(
-    "setup",
-  );
+  const handleCreateRoom = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsCreating(true);
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Carregando...</div>
-      </div>
-    );
-  }
+    try {
+      const response = await fetch("/api/rooms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: roomName }),
+      });
 
-  const canStartMatch = state.players.length >= playersPerTeam * 2;
-  const hasActiveMatch = state.currentMatch !== null;
+      if (!response.ok) {
+        throw new Error("Failed to create room");
+      }
+
+      const data = await response.json();
+      
+      // Store the owner token in localStorage
+      localStorage.setItem(`room_${data.roomId}_token`, data.ownerToken);
+      
+      // Navigate to the room
+      router.push(`/rooms/${data.roomId}`);
+    } catch (err) {
+      setError("Erro ao criar sala. Tente novamente.");
+      console.error(err);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  const handleJoinRoom = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (roomId.trim()) {
+      router.push(`/rooms/${roomId.trim()}`);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-4 sm:p-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center p-4">
+      <div className="max-w-2xl w-full">
+        <header className="text-center mb-12">
+          <h1 className="text-5xl sm:text-6xl font-bold text-gray-800 mb-4">
             ⚽ Fut Evolução
           </h1>
-          <p className="text-gray-600">Sistema de Gerenciamento de Partidas</p>
+          <p className="text-xl text-gray-600">
+            Sistema de Gerenciamento de Partidas
+          </p>
         </header>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-gray-300">
-          <button
-            onClick={() => setActiveTab("setup")}
-            className={`px-6 py-3 font-medium ${
-              activeTab === "setup"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-          >
-            Configuração
-          </button>
-          <button
-            onClick={() => setActiveTab("match")}
-            className={`px-6 py-3 font-medium ${
-              activeTab === "match"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-          >
-            Partida
-          </button>
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`px-6 py-3 font-medium ${
-              activeTab === "history"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-600 hover:text-gray-800"
-            }`}
-          >
-            Histórico ({state.matchHistory.length})
-          </button>
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Create Room */}
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Criar Nova Sala
+            </h2>
+            <form onSubmit={handleCreateRoom} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="roomName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  Nome da Sala
+                </label>
+                <input
+                  id="roomName"
+                  type="text"
+                  value={roomName}
+                  onChange={(e) => setRoomName(e.target.value)}
+                  placeholder="Ex: Pelada do Sábado"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              {error && (
+                <div className="text-red-500 text-sm">{error}</div>
+              )}
+              <button
+                type="submit"
+                disabled={isCreating}
+                className={`w-full py-3 rounded-lg font-bold text-lg ${
+                  isCreating
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-green-500 hover:bg-green-600"
+                } text-white transition-colors`}
+              >
+                {isCreating ? "Criando..." : "Criar Sala"}
+              </button>
+            </form>
+          </div>
+
+          {/* Join Room */}
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              Entrar em uma Sala
+            </h2>
+            <form onSubmit={handleJoinRoom} className="space-y-4">
+              <div>
+                <label
+                  htmlFor="roomId"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  ID da Sala
+                </label>
+                <input
+                  id="roomId"
+                  type="text"
+                  value={roomId}
+                  onChange={(e) => setRoomId(e.target.value)}
+                  placeholder="Cole o ID da sala aqui"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-bold text-lg transition-colors"
+              >
+                Entrar na Sala
+              </button>
+            </form>
+          </div>
         </div>
 
-        {/* Setup Tab */}
-        {activeTab === "setup" && (
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-2xl font-bold mb-4">Adicionar Jogadores</h2>
-              <AddPlayerForm onAdd={addPlayer} />
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-2xl font-bold mb-4">
-                Lista de Jogadores ({state.players.length})
-              </h2>
-              <PlayerList
-                players={state.players}
-                onEdit={editPlayer}
-                onRemove={removePlayer}
-              />
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-2xl font-bold mb-4">
-                Configurações dos Times
-              </h2>
-              <div className="flex items-center gap-4 mb-4">
-                <label className="font-medium">Jogadores por time:</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="11"
-                  value={playersPerTeam}
-                  onChange={(e) =>
-                    setPlayersPerTeam(parseInt(e.target.value) || 5)
-                  }
-                  className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <button
-                onClick={() => shuffleAndSplit(playersPerTeam)}
-                disabled={!canStartMatch}
-                className={`w-full py-3 rounded-lg font-bold text-lg ${
-                  canStartMatch
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                {canStartMatch
-                  ? "🔀 Sortear e Dividir Times"
-                  : `Precisa de pelo menos ${playersPerTeam * 2} jogadores`}
-              </button>
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                onClick={resetGame}
-                className="flex-1 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 font-medium"
-              >
-                Resetar Partidas (Manter Jogadores)
-              </button>
-              <button
-                onClick={clearAllData}
-                className="flex-1 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 font-medium"
-              >
-                Limpar Todos os Dados
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Match Tab */}
-        {activeTab === "match" && (
-          <div className="space-y-6">
-            <CurrentMatch
-              match={state.currentMatch}
-              onPickWinner={pickWinner}
-              onStartNext={startNextMatch}
-            />
-
-            {hasActiveMatch && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <TeamDisplay
-                  title="Time A"
-                  players={state.teamA}
-                  color="blue"
-                />
-                <TeamDisplay title="Banco" players={state.bench} color="gray" />
-                <TeamDisplay title="Time B" players={state.teamB} color="red" />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* History Tab */}
-        {activeTab === "history" && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold mb-4">Histórico de Partidas</h2>
-            <MatchHistory matches={state.matchHistory} />
-          </div>
-        )}
+        <div className="mt-8 text-center text-gray-600">
+          <p className="mb-2">
+            💡 <strong>Dica:</strong> Como dono da sala, você pode editar as
+            informações.
+          </p>
+          <p>
+            Compartilhe o ID da sala com outros jogadores para que eles possam
+            visualizar!
+          </p>
+        </div>
       </div>
     </div>
   );
