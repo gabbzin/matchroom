@@ -1,4 +1,4 @@
-import { Player, Team, Match } from '@/types';
+import { Player, Match } from '@/types';
 
 /**
  * Shuffle an array using Fisher-Yates algorithm

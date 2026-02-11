@@ -15,15 +15,16 @@ const initialState: GameState = {
 };
 
 export const useGameState = () => {
-  const [state, setState] = useState<GameState>(initialState);
+  const [state, setState] = useState<GameState>(() => {
+    // Load initial state from localStorage if available
+    const saved = loadGameState();
+    return saved || initialState;
+  });
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load state from localStorage on mount
+  // Mark as loaded after first render
   useEffect(() => {
-    const saved = loadGameState();
-    if (saved) {
-      setState(saved);
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoaded(true);
   }, []);
 
@@ -88,7 +89,7 @@ export const useGameState = () => {
     setState((prev) => ({
       ...prev,
       matchHistory: [completedMatch, ...prev.matchHistory],
-      currentMatch: null,
+      currentMatch: completedMatch,
     }));
   }, [state.currentMatch]);
 
