@@ -74,7 +74,7 @@ npm run dev
 ## Project Structure
 
 ```
-matchroom/
+fut-evolucao/
 ├── app/                      # Next.js App Router pages
 │   ├── page.tsx             # Home page (create/join rooms)
 │   ├── rooms/[id]/          # Room page (dynamic route)

@@ -1,4 +1,5 @@
 import { GameState } from './index';
+import { Prisma } from '@prisma/client';
 
 export interface Room {
   id: string;
@@ -31,3 +32,6 @@ export interface UpdateRoomRequest {
 export interface UpdateRoomResponse {
   success: boolean;
 }
+
+// Helper type for JSON fields
+export type JsonValue = Prisma.JsonValue;

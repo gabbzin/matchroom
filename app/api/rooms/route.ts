@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { nanoid } from 'nanoid';
 import { CreateRoomRequest, CreateRoomResponse } from '@/types/api';
+import { Prisma } from '@prisma/client';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,18 +24,12 @@ export async function POST(request: NextRequest) {
       data: {
         name: name.trim(),
         ownerId: ownerToken,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        players: [] as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        teamA: [] as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        teamB: [] as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        bench: [] as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        currentMatch: null as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        matchHistory: [] as any,
+        players: [],
+        teamA: [],
+        teamB: [],
+        bench: [],
+        currentMatch: Prisma.JsonNull,
+        matchHistory: [],
       },
     });
 
