@@ -94,12 +94,12 @@ export async function PUT(
     await prisma.room.update({
       where: { id },
       data: {
-        players: gameState.players,
-        teamA: gameState.teamA,
-        teamB: gameState.teamB,
-        bench: gameState.bench,
-        currentMatch: gameState.currentMatch,
-        matchHistory: gameState.matchHistory,
+        players: gameState.players as any,
+        teamA: gameState.teamA as any,
+        teamB: gameState.teamB as any,
+        bench: gameState.bench as any,
+        currentMatch: gameState.currentMatch as any,
+        matchHistory: gameState.matchHistory as any,
       },
     });
 

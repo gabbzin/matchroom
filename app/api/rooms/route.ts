@@ -23,12 +23,12 @@ export async function POST(request: NextRequest) {
       data: {
         name: name.trim(),
         ownerId: ownerToken,
-        players: [],
-        teamA: [],
-        teamB: [],
-        bench: [],
-        currentMatch: null,
-        matchHistory: [],
+        players: [] as any,
+        teamA: [] as any,
+        teamB: [] as any,
+        bench: [] as any,
+        currentMatch: null as any,
+        matchHistory: [] as any,
       },
     });
 
