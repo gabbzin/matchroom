@@ -4,8 +4,8 @@ import { Match } from "@/types";
 
 interface CurrentMatchProps {
   match: Match | null;
-  onPickWinner: (winner: "A" | "B") => void;
-  onStartNext: () => void;
+  onPickWinner?: (winner: "A" | "B") => void;
+  onStartNext?: () => void;
 }
 
 export default function CurrentMatch({
@@ -60,20 +60,26 @@ export default function CurrentMatch({
       </div>
 
       {!hasWinner ? (
-        <div className="flex gap-4 justify-center">
-          <button
-            onClick={() => onPickWinner("A")}
-            className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-bold text-lg"
-          >
-            Time A Venceu
-          </button>
-          <button
-            onClick={() => onPickWinner("B")}
-            className="px-8 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 font-bold text-lg"
-          >
-            Time B Venceu
-          </button>
-        </div>
+        onPickWinner ? (
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={() => onPickWinner("A")}
+              className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-bold text-lg"
+            >
+              Time A Venceu
+            </button>
+            <button
+              onClick={() => onPickWinner("B")}
+              className="px-8 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 font-bold text-lg"
+            >
+              Time B Venceu
+            </button>
+          </div>
+        ) : (
+          <div className="text-center text-gray-500">
+            Aguardando o dono escolher o vencedor...
+          </div>
+        )
       ) : (
         <div className="text-center">
           <div className="mb-4">
@@ -81,12 +87,19 @@ export default function CurrentMatch({
               Time {match.winner} Venceu! 🎉
             </span>
           </div>
-          <button
-            onClick={onStartNext}
-            className="px-8 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-bold text-lg"
-          >
-            Iniciar Próxima Partida
-          </button>
+          {onStartNext && (
+            <button
+              onClick={onStartNext}
+              className="px-8 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 font-bold text-lg"
+            >
+              Iniciar Próxima Partida
+            </button>
+          )}
+          {!onStartNext && (
+            <div className="text-gray-500">
+              Aguardando o dono iniciar a próxima partida...
+            </div>
+          )}
         </div>
       )}
     </div>

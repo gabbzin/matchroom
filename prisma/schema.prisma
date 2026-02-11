@@ -1,0 +1,28 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Room {
+  id           String   @id @default(cuid())
+  name         String
+  ownerId      String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Game state stored as JSON
+  players      Json     @default("[]")
+  teamA        Json     @default("[]")
+  teamB        Json     @default("[]")
+  bench        Json     @default("[]")
+  currentMatch Json?
+  matchHistory Json     @default("[]")
+  
+  @@index([ownerId])
+}

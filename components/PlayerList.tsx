@@ -5,8 +5,8 @@ import { useState } from "react";
 
 interface PlayerListProps {
   players: Player[];
-  onEdit: (id: string, name: string) => void;
-  onRemove: (id: string) => void;
+  onEdit?: (id: string, name: string) => void;
+  onRemove?: (id: string) => void;
 }
 
 export default function PlayerList({
@@ -23,7 +23,7 @@ export default function PlayerList({
   };
 
   const saveEdit = () => {
-    if (editingId && editName.trim()) {
+    if (editingId && editName.trim() && onEdit) {
       onEdit(editingId, editName);
       setEditingId(null);
       setEditName("");
@@ -79,20 +79,26 @@ export default function PlayerList({
           ) : (
             <>
               <span className="font-medium">{player.name}</span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => startEdit(player)}
-                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Editar
-                </button>
-                <button
-                  onClick={() => onRemove(player.id)}
-                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Remover
-                </button>
-              </div>
+              {(onEdit || onRemove) && (
+                <div className="flex gap-2">
+                  {onEdit && (
+                    <button
+                      onClick={() => startEdit(player)}
+                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      Editar
+                    </button>
+                  )}
+                  {onRemove && (
+                    <button
+                      onClick={() => onRemove(player.id)}
+                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                    >
+                      Remover
+                    </button>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
