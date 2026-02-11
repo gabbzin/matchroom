@@ -1,9 +1,9 @@
-import { Player, Match } from '@/types';
+import { Player, Match } from "@/types";
 
 /**
  * Shuffle an array using Fisher-Yates algorithm
  */
-export const shuffleArray = <T,>(array: T[]): T[] => {
+export const shuffleArray = <T>(array: T[]): T[] => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -17,13 +17,13 @@ export const shuffleArray = <T,>(array: T[]): T[] => {
  */
 export const splitIntoTeams = (
   players: Player[],
-  playersPerTeam: number = 5
+  playersPerTeam: number = 5,
 ): { teamA: Player[]; teamB: Player[]; bench: Player[] } => {
   const shuffled = shuffleArray(players);
   const teamA = shuffled.slice(0, playersPerTeam);
   const teamB = shuffled.slice(playersPerTeam, playersPerTeam * 2);
   const bench = shuffled.slice(playersPerTeam * 2);
-  
+
   return { teamA, teamB, bench };
 };
 
@@ -34,34 +34,56 @@ export const rotateTeams = (
   teamA: Player[],
   teamB: Player[],
   bench: Player[],
-  winner: 'A' | 'B'
+  winner: "A" | "B",
 ): { teamA: Player[]; teamB: Player[]; bench: Player[] } => {
   if (bench.length === 0) {
     // No rotation if no bench players
     return { teamA, teamB, bench };
   }
 
-  const losingTeam = winner === 'A' ? teamB : teamA;
-  const winningTeam = winner === 'A' ? teamA : teamB;
-  
-  // Number of players to rotate from bench
-  const playersToRotate = Math.min(bench.length, losingTeam.length);
-  
-  // Take players from bench
-  const newPlayers = bench.slice(0, playersToRotate);
-  const remainingBench = [...bench.slice(playersToRotate), ...losingTeam];
-  
-  if (winner === 'A') {
+  const losingTeam = winner === "A" ? teamB : teamA;
+  const winningTeam = winner === "A" ? teamA : teamB;
+  const playersPerTeam = losingTeam.length;
+
+  // If bench has enough players to form a complete team, do normal rotation
+  if (bench.length >= playersPerTeam) {
+    const newPlayers = bench.slice(0, playersPerTeam);
+    const remainingBench = [...bench.slice(playersPerTeam), ...losingTeam];
+
+    if (winner === "A") {
+      return {
+        teamA: winningTeam,
+        teamB: newPlayers,
+        bench: remainingBench,
+      };
+    } else {
+      return {
+        teamA: newPlayers,
+        teamB: winningTeam,
+        bench: remainingBench,
+      };
+    }
+  }
+
+  // If bench doesn't have enough players, redistribute all available players
+  // Combine bench and losing team, shuffle them
+  const availablePlayers = shuffleArray([...bench, ...losingTeam]);
+
+  // Create new teams with proper size
+  const newTeamPlayers = availablePlayers.slice(0, playersPerTeam);
+  const newBenchPlayers = availablePlayers.slice(playersPerTeam);
+
+  if (winner === "A") {
     return {
       teamA: winningTeam,
-      teamB: newPlayers,
-      bench: remainingBench,
+      teamB: newTeamPlayers,
+      bench: newBenchPlayers,
     };
   } else {
     return {
-      teamA: newPlayers,
+      teamA: newTeamPlayers,
       teamB: winningTeam,
-      bench: remainingBench,
+      bench: newBenchPlayers,
     };
   }
 };
@@ -79,18 +101,18 @@ export const generateId = (): string => {
 export const createMatch = (
   teamA: Player[],
   teamB: Player[],
-  winner: 'A' | 'B' | null = null
+  winner: "A" | "B" | null = null,
 ): Match => {
   return {
     id: generateId(),
     teamA: {
-      id: 'team-a',
-      name: 'Team A',
+      id: "team-a",
+      name: "Team A",
       players: teamA,
     },
     teamB: {
-      id: 'team-b',
-      name: 'Team B',
+      id: "team-b",
+      name: "Team B",
       players: teamB,
     },
     winner,

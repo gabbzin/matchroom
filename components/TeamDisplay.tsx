@@ -1,24 +1,28 @@
-'use client';
+"use client";
 
-import { Player } from '@/types';
+import { Player } from "@/types";
 
 interface TeamDisplayProps {
   title: string;
   players: Player[];
-  color: 'blue' | 'red' | 'gray';
+  color: "blue" | "red" | "gray";
 }
 
-export default function TeamDisplay({ title, players, color }: TeamDisplayProps) {
+export default function TeamDisplay({
+  title,
+  players,
+  color,
+}: TeamDisplayProps) {
   const colorClasses = {
-    blue: 'bg-blue-100 border-blue-500',
-    red: 'bg-red-100 border-red-500',
-    gray: 'bg-gray-100 border-gray-500',
+    blue: "bg-blue-100 border-blue-500",
+    red: "bg-red-100 border-red-500",
+    gray: "bg-gray-100 border-gray-500",
   };
 
   const titleColorClasses = {
-    blue: 'text-blue-700',
-    red: 'text-red-700',
-    gray: 'text-gray-700',
+    blue: "text-blue-700",
+    red: "text-red-700",
+    gray: "text-gray-700",
   };
 
   return (
@@ -27,7 +31,7 @@ export default function TeamDisplay({ title, players, color }: TeamDisplayProps)
         {title}
       </h3>
       {players.length === 0 ? (
-        <p className="text-gray-500 text-center py-4">No players</p>
+        <p className="text-gray-500 text-center py-4">Nenhum jogador</p>
       ) : (
         <ul className="space-y-2">
           {players.map((player, index) => (
@@ -41,7 +45,7 @@ export default function TeamDisplay({ title, players, color }: TeamDisplayProps)
         </ul>
       )}
       <div className="mt-3 text-sm text-gray-600 font-medium">
-        Total: {players.length} players
+        Total: {players.length} jogadores
       </div>
     </div>
   );
