@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import { useRoomState } from "@/hooks/useRoomState";
 import AddPlayerForm from "@/components/AddPlayerForm";
 import PlayerList from "@/components/PlayerList";
@@ -16,7 +16,7 @@ export default function RoomPage({
 }) {
   const { id } = use(params);
   const router = useRouter();
-  
+
   const {
     state,
     isLoaded,
@@ -39,6 +39,13 @@ export default function RoomPage({
     "setup",
   );
   const [showCopied, setShowCopied] = useState(false);
+
+  // Update document title with room name
+  useEffect(() => {
+    if (roomName) {
+      document.title = roomName;
+    }
+  }, [roomName]);
 
   const handleCopyRoomId = () => {
     navigator.clipboard.writeText(id);
@@ -88,7 +95,7 @@ export default function RoomPage({
             ⚽ {roomName}
           </h1>
           <p className="text-gray-600">Sistema de Gerenciamento de Partidas</p>
-          
+
           {/* Room Info */}
           <div className="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
             <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg shadow">
@@ -103,7 +110,7 @@ export default function RoomPage({
                 📋
               </button>
             </div>
-            
+
             <button
               onClick={handleShareRoom}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 text-sm"
@@ -177,7 +184,8 @@ export default function RoomPage({
             {!isOwner && (
               <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg">
                 <p className="font-medium">
-                  ⚠️ Você está visualizando esta sala. Apenas o dono pode fazer alterações.
+                  ⚠️ Você está visualizando esta sala. Apenas o dono pode fazer
+                  alterações.
                 </p>
               </div>
             )}
@@ -234,8 +242,8 @@ export default function RoomPage({
                 {!isOwner
                   ? "Apenas o dono pode sortear times"
                   : canStartMatch
-                  ? "🔀 Sortear e Dividir Times"
-                  : `Precisa de pelo menos ${playersPerTeam * 2} jogadores`}
+                    ? "🔀 Sortear e Dividir Times"
+                    : `Precisa de pelo menos ${playersPerTeam * 2} jogadores`}
               </button>
             </div>
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fut Evolução - Soccer Match Management",
+  title: "Match Room - Soccer Match Management",
   description: "Manage soccer matches, teams, and players with ease",
 };
 
@@ -12,10 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className="antialiased">
-        {children}
-      </body>
+    <html lang="pt-br">
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

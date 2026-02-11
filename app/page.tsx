@@ -29,10 +29,10 @@ export default function Home() {
       }
 
       const data = await response.json();
-      
+
       // Store the owner token in localStorage
       localStorage.setItem(`room_${data.roomId}_token`, data.ownerToken);
-      
+
       // Navigate to the room
       router.push(`/rooms/${data.roomId}`);
     } catch (err) {
@@ -43,7 +43,7 @@ export default function Home() {
     }
   };
 
-  const handleJoinRoom = (e: React.FormEvent) => {
+  const handleJoinRoom = (e: React.SubmitEvent) => {
     e.preventDefault();
     if (roomId.trim()) {
       router.push(`/rooms/${roomId.trim()}`);
@@ -55,7 +55,7 @@ export default function Home() {
       <div className="max-w-2xl w-full">
         <header className="text-center mb-12">
           <h1 className="text-5xl sm:text-6xl font-bold text-gray-800 mb-4">
-            ⚽ Fut Evolução
+            ⚽ Match Room
           </h1>
           <p className="text-xl text-gray-600">
             Sistema de Gerenciamento de Partidas
@@ -86,9 +86,7 @@ export default function Home() {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              {error && (
-                <div className="text-red-500 text-sm">{error}</div>
-              )}
+              {error && <div className="text-red-500 text-sm">{error}</div>}
               <button
                 type="submit"
                 disabled={isCreating}
